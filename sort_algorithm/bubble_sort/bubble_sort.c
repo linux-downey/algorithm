@@ -29,6 +29,11 @@ void sort_bubble(u32 *data,u32 len)
 }
 
 
+s32 get_data_from_file(char* file_name,u32 *data,u32 *len)
+{
+
+}
+
 
 int main(int argc,char *argv[])
 {
@@ -37,19 +42,28 @@ int main(int argc,char *argv[])
     memset(sort_num_array,0,(argc-1)*sizeof(u32));
     if(argc<2)
     {
-        printf("Too few arg!!\r\n");
+        printf("Too few arg !!\r\n");
     }
     else
     {
-        for(int i=0;i<argc-1;i++)
+        if(strspn(argv[1],"0123456789")!=strlen(argv[1]))
         {
-            sort_num_array[i]=str_to_num(argv[i+1]);
+            //printf("files\n");
+
         }
-        sort_bubble(sort_num_array,(argc-1));
-        for(int i=0;i<argc-1;i++)
+        else
         {
-            printf("%d\t",sort_num_array[i]);
-        }     
-        printf("\r\n");
+            for(int i=0;i<argc-1;i++)
+            {
+                sort_num_array[i]=str_to_num(argv[i+1]);
+            }
+            sort_bubble(sort_num_array,(argc-1));
+            for(int i=0;i<argc-1;i++)
+            {
+                printf("%d\t",sort_num_array[i]);
+            }     
+            printf("\r\n");
+        }
     }
+    
 }
