@@ -12,4 +12,17 @@ typedef unsigned char u8;
 typedef int s32;
 
 
+typedef void(*Algo_func)(u32 *,u32);
+
+
+
+
+
+
+u32 get_process_time(Algo_func func,u32 *data,u32 len);
+
+
+
+
+
 #endif
