@@ -28,6 +28,7 @@ class Select
         void get_cmdline_num(char* argv[],u32 len);
     private:
         vector<u32> data_from_cmdline;
+        u32 get_min_num(u32 *data,u32 len);
 };
 
 

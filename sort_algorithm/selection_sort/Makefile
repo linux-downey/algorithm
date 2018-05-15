@@ -1,4 +1,4 @@
-TARGET = bubble_sort
+TARGET = selection_sort
 HED_DIR  += ./inc/
 LIB_DIR  +=
 LIB_NAME +=
