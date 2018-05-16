@@ -1,6 +1,7 @@
 #include "bubble_sort.h"
 #include <sys/time.h>
 #include <unistd.h>
+#include <sstream>
 
 
 
@@ -66,6 +67,7 @@ s32 get_data_from_file(const char* file_name,u32 *data,u32 *len)
 
 void print_32_array(u32 *buf,u32 buf_len)
 {
+<<<<<<< Updated upstream
     for(int i=0;i<buf_len;i++)
     {
         printf("%d-%d ",i+1,buf[i]);
@@ -81,6 +83,9 @@ u32 get_process_time(Algo_func func,u32 *data,u32 len)
     func(data,len);
     gettimeofday(&tv_after,NULL);
     return (tv_after.tv_sec*1000000+tv_after.tv_usec)-(tv_befor.tv_sec*1000000+tv_befor.tv_usec);
+=======
+    
+>>>>>>> Stashed changes
 }
 
 
