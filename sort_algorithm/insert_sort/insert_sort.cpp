@@ -38,13 +38,28 @@ s32 Insert::Insert_to_ordered(u32 *data,u32 len,u32 insert_value)
 }
 
 
+
+void Insert::shift_array(u32 *data,u32 len,u32 insert_index,u32 insert_data)
+{
+    
+    u32 *temp=new u32(len);
+    memcpy(temp,data,len*sizeof(u32));
+    
+    data[insert_index]=insert_data;
+    memcpy(&data[insert_index+1],&temp[insert_index],(len-insert_index)*sizeof(u32));
+    delete[] temp;
+    
+}
+
 void Insert::Insert_sort(u32 *data,u32 len)
 {
     u32 i=0;
-    u32 inse_index=0;
-    for(i=0;i<len;i++)
+    u32 insert_index=0;
+    u32 temp=0;
+    for(i=1;i<len;i++)
     {
-        Insert_to_ordered(data,i,data[i]);
+        insert_index=Insert_to_ordered(data,i,data[i]);
+        shift_array(data,i,insert_index,data[i]);
     }
 }
 
@@ -65,10 +80,14 @@ void Insert::print_data(T *data,u32 data_len)
 
 int main(int argc,char *argv[])
 {
-    u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+    u32 data[100]={5,4,3,2,1,55,66,25};
     u32 ret;
     Insert sort;
-    ret=sort.Insert_to_ordered(data,20,0);
-    cout<<ret<<endl;
+    sort.Insert_sort(data,8);
+    sort.print_data(data,8);
+    //sort.shift_array(data,5,2,88);
+    //cout<<data[0]<<' '<<data[1]<<' '<<data[2]<<' '<<data[3]<<' '<<data[4]<<' '<<data[5]<<endl;
+    //ret=sort.Insert_to_ordered(data,20,0);
+    //cout<<ret<<endl;
     return 1;
 }
