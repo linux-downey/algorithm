@@ -42,7 +42,7 @@ s32 Insert::Insert_to_ordered(u32 *data,u32 len,u32 insert_value)
 void Insert::shift_array(u32 *data,u32 len,u32 insert_index,u32 insert_data)
 {
     
-    u32 *temp=new u32(len);
+    u32 *temp=new u32[len];
     memcpy(temp,data,len*sizeof(u32));
     
     data[insert_index]=insert_data;
@@ -80,11 +80,12 @@ void Insert::print_data(T *data,u32 data_len)
 
 int main(int argc,char *argv[])
 {
-    u32 data[100]={5,4,3,2,1,55,66,25};
+    //u32 data[100]={5,11,36,2,1,55,66,18,3,564};
+    u32 data[100]={5,11,36,2,1,55,12};
     u32 ret;
     Insert sort;
-    sort.Insert_sort(data,8);
-    sort.print_data(data,8);
+    sort.Insert_sort(data,7);
+    sort.print_data(data,7);
     //sort.shift_array(data,5,2,88);
     //cout<<data[0]<<' '<<data[1]<<' '<<data[2]<<' '<<data[3]<<' '<<data[4]<<' '<<data[5]<<endl;
     //ret=sort.Insert_to_ordered(data,20,0);
