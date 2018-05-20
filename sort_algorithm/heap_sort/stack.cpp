@@ -9,7 +9,6 @@ Stack::Stack()
 Stack::~Stack()
 {
     destroy_stack();
-    cout<<"hhhhh"<<endl;
 }
 
 s32 Stack::destroy_stack()
