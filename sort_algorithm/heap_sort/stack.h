@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-
+/*
 using std::cout;
 using std::cin;
 using std::endl;
@@ -18,6 +18,7 @@ using u16=unsigned short;
 using u32=unsigned int;
 using s32=int;
 
+*/
 template <class T> 
 struct Stack_node
 {

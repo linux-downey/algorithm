@@ -9,6 +9,7 @@ Stack::Stack()
 Stack::~Stack()
 {
     destroy_stack();
+    cout<<"hhhhh"<<endl;
 }
 
 s32 Stack::destroy_stack()
@@ -16,8 +17,9 @@ s32 Stack::destroy_stack()
     u32 temp=0;
     while(0==stack_pop(&temp))
     {
-        delete stack.top;
+        
     }
+    delete stack.top;
     return 0;
 }
 
@@ -93,7 +95,8 @@ s32 Stack::stack_push(u32 elem)
 }
 
 
-int main()
+
+void func()
 {
     Stack S;
     u32 data[]={1,2,3,4,5,6,7,8,9};
@@ -103,14 +106,21 @@ int main()
     {
         S.stack_push(data[i]);
     }
-    for(u32 i=0;i<10;i++)
+    for(u32 i=0;i<5;i++)
     {
         S.stack_pop(&value[i]);
         cout<<value[i]<<"  ";
     }
     cout<<endl;
-    S.destroy_stack();
+}
+
+
+/*
+int main()
+{
+    func();
     return 0;
 
 }
+*/
 
