@@ -3,6 +3,9 @@
 
 #include <iostream>
 
+#include "binary.h"
+
+
 #ifndef PRE_DEFINE
 #define PRE_DEFINE
 
@@ -28,13 +31,26 @@ struct Q_NODE
 	T data;
 };
 
+
+using QUEUE_ELEM_TYPE=TREE_NODE_PTR;
+
+
+using QUEUE_NODE = Q_NODE<QUEUE_ELEM_TYPE>;  //Take the binary tree node pointer as queue-node value part.
+using QUEUE_NODE_PTR = Q_NODE<QUEUE_ELEM_TYPE>*;
+
+// using QUEUE_NODE = Q_NODE<u32>;  //Take the binary tree node pointer as queue-node value part.
+// using QUEUE_NODE_PTR = Q_NODE<u32>*;
+
 struct Q
 {
-	Q_NODE<u32>* head;
-	Q_NODE<u32>* tail;
+	QUEUE_NODE* head;
+	QUEUE_NODE* tail;
 	u32 q_len;
 	u32 max_len;
 };
+
+
+
 
 
 class QUEUE
@@ -43,14 +59,17 @@ class QUEUE
 		~QUEUE();
 		QUEUE(u32 max_queue_len=DEFAULT_MAX_QUEUE_LEN);
 		s32 destroy_queue();
-		s32 push(u32 data);
-		s32 pop(u32 *data);
+		
+		s32 push(QUEUE_ELEM_TYPE data);
+
+		s32 pop(QUEUE_ELEM_TYPE& data);
+		
+		s32 pop(); 
 		s32 is_empty();
 		s32 is_full();
 		s32 get_queue_len();
 	private:
-		Q queue;
-		
+		Q queue;	
 };
 
 

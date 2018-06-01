@@ -2,11 +2,23 @@
 #include "queue.h"
 
 
-BinaryTree::BinaryTree()
+template<typename T>
+void BinaryTree::print_node_value(T value)
 {
-	//root=new TreeNode<u32>;
+	cout<<value<<"  ";
 }
 
+
+
+BinaryTree::BinaryTree()
+{
+
+}
+
+
+/*destroy the tree.
+**
+*/
 BinaryTree::~BinaryTree()
 {
 	destroy_tree(root);
@@ -14,8 +26,10 @@ BinaryTree::~BinaryTree()
 
 
 
-
-s32 BinaryTree::destroy_tree(TreeNode<u32> *root)
+/*
+post order traversal way to delete node one by one.
+*/
+s32 BinaryTree::destroy_tree(TREE_NODE *root)
 {
 	if(NULL==root)
 	{	
@@ -27,142 +41,259 @@ s32 BinaryTree::destroy_tree(TreeNode<u32> *root)
 	destroy_tree(root->right_child);
 	
 	delete root;
+
+	root=NULL;
 	
 	return 0;
 }
 
 
-TreeNode<u32>* BinaryTree::create_tree()
+
+/*Create a binary tree and get the root,So that it can destroy the tree automatically when class call destructor function. 
+**
+*/
+TREE_NODE* BinaryTree::create_tree()
 {
-	TreeNode<u32>* root;
+	root=create_tree_preorder();
+	return root;
+}
+
+
+/*Create tree from user input node elem.
+**
+*/
+TREE_NODE* BinaryTree::create_tree_preorder()
+{
+	TREE_NODE* root;
 	char c;
 	cin>>c;
 	if('!'==c)
 	{
 		return NULL;
 	}
-	root=new TreeNode<u32>;
+	root=new TREE_NODE;
 	root->value=c;
 	
-	root->left_child=create_tree();
-	root->right_child=create_tree();
+	root->left_child=create_tree_preorder();
+	root->right_child=create_tree_preorder();
 	
 	return root;
 }
 
-
-TreeNode<u32>* BinaryTree::get_root()
+/*Get tree root.
+**
+*/
+TREE_NODE* BinaryTree::get_root()
 {
 	return root;
 }
 
 
 
-s32 BinaryTree::create_tree(u32 value)
+/*Create extendable null tree.
+**
+*/
+s32 BinaryTree::create_tree(ELEM_TYPE value)
 {
-	root=new TreeNode<u32>;
+	root=new TREE_NODE;
 	root->value=value;
 	root->left_child=NULL;
 	root->right_child=NULL;
 	return 0;
 }
 
-s32 BinaryTree::preorder_traversal(TreeNode<u32> *root)
+
+/*Traversal the tree in the way of preorder.
+**
+*/
+s32 BinaryTree::preorder_traversal(TREE_NODE *root)
 {
 	if(NULL==root)
 	{
 		return -1;
 	}
-	cout<<root->value<<"  ";
+	print_node_value(root->value-0x30);
+	
 	preorder_traversal(root->left_child);
 	preorder_traversal(root->right_child);
 	return 0;
 }
 
 
-s32 BinaryTree::middle_order_traversal(TreeNode<u32> *root)
+/*Traversal the tree in the way of middle order.
+**
+*/
+s32 BinaryTree::middle_order_traversal(TREE_NODE *root)
 {
 	if(NULL==root)
 	{
 		return -1;
 	}
-	
-	preorder_traversal(root->left_child);
-	cout<<root->value<<"  ";
-	preorder_traversal(root->right_child);
+	middle_order_traversal(root->left_child);
+	print_node_value(root->value-0x30);
+	middle_order_traversal(root->right_child);
 	return 0;
 }
 
-
-s32 BinaryTree::post_order_traversal(TreeNode<u32> *root)
+/*Traversal the tree in the way of post order.
+**
+*/
+s32 BinaryTree::post_order_traversal(TREE_NODE *root)
 {
 	if(NULL==root)
 	{
 		return -1;
 	}
-	
 	post_order_traversal(root->left_child);
 	post_order_traversal(root->right_child);
-	cout<<root->value<<"  ";
+	print_node_value(root->value-0x30);
 	return 0;
 	
 }
 
-
-s32 BinaryTree::level_traversal(TreeNode<u32> *root)
+/*Traversal the tree in the way of level.
+**Implementation:1.Push the root into queue,
+**				 2.pop queue node,print node.Push two of child nodes into the queue if child node != NULL.
+**				 3.Perform step 2 till queue is empty.
+**
+**The queue value is a pointer to binary node.
+*/
+s32 BinaryTree::level_traversal(TREE_NODE *root)
 {
+	QUEUE_ELEM_TYPE elem;
 	QUEUE queue;
-	/*u32 root_addr=static_cast<u32>(root);
 	queue.push(root);
-	//cout<<root->value<<"  ";
-	while(-1!=queue.pop(&root_addr))
+
+	while(-1!=queue.pop(elem))
 	{
-		if(NULL!=(TreeNode<u32>*)root_addr->left_child)
+		if(NULL!=(elem->left_child))
 		{
-			queue.push((TreeNode<u32>*)root_addr->left_child);	
+			queue.push(elem->left_child);	
 		}
-		if(NULL!=(TreeNode<u32>*)root_addr->right_child)
+		if(NULL!=(elem->right_child))
 		{
-			queue.push((TreeNode<u32>*)root_addr->right_child);	
+			queue.push(elem->right_child);	
 		}
-		cout<<(TreeNode<u32>*)root_addr->value<<"  ";
-	}*/
+		print_node_value(elem->value-0x30);
+	}
 	return 0;
 }
 
-
-s32 BinaryTree::get_height_of_tree(TreeNode<u32> *root)
+/*Get the height of tree.
+**In the way of post order traversal,treat each subtree as a separate tree,get subtree's height recursively.
+*/
+u32 BinaryTree::get_height_of_tree(TREE_NODE *root)
 {
-	
-	return 0;
+	if(NULL==root)
+	{
+		return 0;
+	}
+	u32 left_height=get_height_of_tree(root->left_child);
+	u32 right_height=get_height_of_tree(root->right_child);
+	return left_height>right_height?left_height+1:right_height+1;
 }
 
 
-
-s32 BinaryTree::insert_node(u32 value)
+/*Get all leaves counts.Leaf definition:the node without any subnode.
+*/
+u32 BinaryTree::leaves_counts(TREE_NODE *root)
 {
-	return 0;
+	if(NULL==root)
+	{
+		return 0;
+	}
+	if((NULL==root->left_child) && (NULL==root->right_child))
+	{
+		return 1;
+	}
+	u32 left_counts=leaves_counts(root->left_child);
+	u32 right_counts=leaves_counts(root->right_child);
+	return left_counts+right_counts;
 }
 
-s32 BinaryTree::delete_node(u32 *value)
+
+/*Get all nodes counts. 
+**
+*/
+u32 BinaryTree::nodes_counts(TREE_NODE *root)
 {
-	return 0;
+	if(NULL==root)
+	{
+		return 0;
+	}
+	u32 left_counts=nodes_counts(root->left_child);
+	u32 right_counts=nodes_counts(root->right_child);
+	return left_counts+right_counts+1;
 }
+
+
+/*Get nth level nodes.Root is level 0,and so on.
+**
+*/
+u32 BinaryTree::get_level_nodes(TREE_NODE *root,u32 level)
+{
+	if((NULL==root)||(level<0))
+	{
+		return 0;
+	}
+	if(0==level)
+	{
+		return 1;
+	}
+	u32 left_node_counts=get_level_nodes(root->left_child,level-1);
+	u32 right_node_counts=get_level_nodes(root->right_child,level-1);
+	return right_node_counts+left_node_counts;
+}
+
+
+
 
 
 #ifdef BITREE_DEBUG
 
 int main()
 {
+	u32 height=0;
+	u32 node_cts=0;
+	u32 leaf_couts=0;
+	u32 level_node_counts=0;
+	TREE_NODE* head; 
+
 	BinaryTree BT;
-	BT.root=BT.create_tree();
-	//BT.destroy_tree(root);
-	BT.preorder_traversal(BT.root);
+	head=BT.create_tree();
+	
+	BT.preorder_traversal(head);
 	cout<<endl;
-	BT.middle_order_traversal(BT.root);
+	BT.middle_order_traversal(head);
 	cout<<endl;
-	BT.post_order_traversal(BT.root);
+	BT.post_order_traversal(head);
 	cout<<endl;
+	BT.level_traversal(head);
+	cout<<endl;
+
+	height=BT.get_height_of_tree(head);
+	cout<<"height="<<height<<endl;
+
+	node_cts=BT.nodes_counts(head);
+	cout<<"nodes counts="<<node_cts<<endl;
+
+	leaf_couts=BT.leaves_counts(head);
+	cout<<"leaf counts="<<leaf_couts<<endl;
+
+	level_node_counts=BT.get_level_nodes(head,0);
+	cout<<"level node counts="<<level_node_counts<<endl;
+
+	level_node_counts=BT.get_level_nodes(head,1);
+	cout<<"level node counts="<<level_node_counts<<endl;
+
+	level_node_counts=BT.get_level_nodes(head,2);
+	cout<<"level node counts="<<level_node_counts<<endl;
+
+	level_node_counts=BT.get_level_nodes(head,3);
+	cout<<"level node counts="<<level_node_counts<<endl;
+
+	level_node_counts=BT.get_level_nodes(head,4);
+	cout<<"level node counts="<<level_node_counts<<endl;
 	return 0;
 }
 

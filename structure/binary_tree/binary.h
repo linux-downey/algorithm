@@ -28,28 +28,37 @@ struct TreeNode
 	T value;
 };
 
+using ELEM_TYPE=u32;
+
+using TREE_NODE=TreeNode<ELEM_TYPE>;
+using TREE_NODE_PTR=TreeNode<ELEM_TYPE>*;
 
 class BinaryTree
 {
 	public:
 	 	BinaryTree();
 		~BinaryTree();
-		TreeNode<u32>* create_tree();   //create a tree from user input.
-		s32 create_tree(u32 value);    //create a empty tree;
-		s32 destroy_tree(TreeNode<u32> *root);
-		s32 insert_node(u32 value);
-		s32 delete_node(u32 *value);
-		TreeNode<u32>* get_root();
-		TreeNode<u32> *root;
+		TREE_NODE* create_tree_preorder();
+		TREE_NODE* create_tree();   //create a tree from user input.
+		s32 create_tree(ELEM_TYPE value);    //create a empty tree;
+		s32 destroy_tree(TREE_NODE *root);
 		
-		s32 preorder_traversal(TreeNode<u32> *root);
-		s32 middle_order_traversal(TreeNode<u32> *root);
-		s32 post_order_traversal(TreeNode<u32> *root);
-		s32 level_traversal(TreeNode<u32> *root);
-		s32 level_traversal(TreeNode<u32> *root);
-		s32 get_height_of_tree(TreeNode<u32> *root);
+		
+		s32 preorder_traversal(TREE_NODE *root);
+		s32 middle_order_traversal(TREE_NODE *root);
+		s32 post_order_traversal(TREE_NODE *root);
+		s32 level_traversal(TREE_NODE *root);
+		u32 get_height_of_tree(TREE_NODE *root);
+		u32 leaves_counts(TREE_NODE *root);
+		u32 nodes_counts(TREE_NODE *root);
+		u32 get_level_nodes(TREE_NODE *root,u32 level);
+		
+		TREE_NODE* get_root();
+
+		template<typename T>
+		void print_node_value(T value);
 	private:
-		
+		TREE_NODE *root;
 };
 
 
