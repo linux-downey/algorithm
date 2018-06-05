@@ -188,7 +188,7 @@ int main()
 {
 	QUEUE<QUEUE_ELEM_TYPE> queue;
 	QUEUE_ELEM_TYPE temp;
-	QUEUE_ELEM_TYPE a[10]={"hihi","sdf","sdfa","adfasf","adfas","asfd","asdfds","safdasf","daf","adsfdsf"};
+	QUEUE_ELEM_TYPE a[10]={"abc","bcd","cdf","efg","fgh","ghi","hij","ijk","jkl","klm"};
 	for(int i=0;i<10;i++)
 	{
 		queue.push(a[i]);
