@@ -34,7 +34,7 @@ s32 Insert::Insert_to_ordered(u32 *data,u32 len,u32 insert_value)
             end=index;
         }
     }
-    return start;
+    return start+1;      //if end-start equal to 1,insert value>start,insert_value<end.Put it next to start.
 }
 
 
@@ -59,7 +59,9 @@ void Insert::Insert_sort(u32 *data,u32 len)
     for(i=1;i<len;i++)
     {
         insert_index=Insert_to_ordered(data,i,data[i]);
+        
         shift_array(data,i,insert_index,data[i]);
+        print_data(data,i+1);
     }
 }
 
@@ -80,12 +82,12 @@ void Insert::print_data(T *data,u32 data_len)
 
 int main(int argc,char *argv[])
 {
-    //u32 data[100]={5,11,36,2,1,55,66,18,3,564};
-    u32 data[100]={5,11,36,2,1,55,12};
+    u32 data[100]={5,11,53,1,9,55,54,18,3,5};
+    //u32 data[100]={5,11,36,2,1,55,12};
     u32 ret;
     Insert sort;
-    sort.Insert_sort(data,7);
-    sort.print_data(data,7);
+    sort.Insert_sort(data,10);
+    sort.print_data(data,10);
     //sort.shift_array(data,5,2,88);
     //cout<<data[0]<<' '<<data[1]<<' '<<data[2]<<' '<<data[3]<<' '<<data[4]<<' '<<data[5]<<endl;
     //ret=sort.Insert_to_ordered(data,20,0);
