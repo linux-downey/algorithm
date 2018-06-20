@@ -382,6 +382,7 @@ s32 BinaryTree<NODE_TYPE>::level_traversal(NODE_TYPE *root)
 		}
 		print_node_value(elem->value);
 	}
+	cout<<endl;
 	return 0;
 }
 

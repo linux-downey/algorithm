@@ -41,6 +41,16 @@ void AVLTree::LR_TO_LL_rotation(AVLTreeNode* node)
     swap_two_node_value(temp,node);
     node->left_child=temp;
 
+    if(NULL==node->right_child)
+    {
+        node->bf=LH;
+        node->left_child->bf=EH;
+    }   
+    else
+    {
+        node->bf=LH;
+        node->left_child->bf=LH;
+    }
 }
 
 void AVLTree::RL_TO_RR_rotation(AVLTreeNode* node)
@@ -49,11 +59,23 @@ void AVLTree::RL_TO_RR_rotation(AVLTreeNode* node)
 
     node->left_child->right_child=node;
     node->left_child=NULL;
-
+    //cout<<"hehehe"<<endl;
     /*The top node is node->left_child after rotation,but the node's father still point to node.
       So we should move the node to the top position.*/
     swap_two_node_value(temp,node);
+
     node->right_child=temp;
+
+    if(NULL==node->left_child)
+    {
+        node->bf=RH;
+        node->right_child->bf=EH;
+    }
+    else
+    {
+        node->bf=RH;
+        node->right_child->bf=RH;
+    }
 }
 
 
@@ -68,6 +90,8 @@ void AVLTree::L_rotation(AVLTreeNode* node)
 
     swap_two_node_value(swap_temp,node);
     node->left_child=swap_temp;
+
+    node->bf=node->left_child->bf=0;
 }
 
 /*case LL rotation*/
@@ -82,6 +106,8 @@ void AVLTree::R_rotation(AVLTreeNode* node)
 
     swap_two_node_value(swap_temp,node);
     node->right_child=swap_temp;
+
+    node->bf=node->right_child->bf=0;
 }
 
 
@@ -99,8 +125,9 @@ void AVLTree::LR_rotation(AVLTreeNode* node)
 
 void AVLTree::RL_rotation(AVLTreeNode* node)
 {
-    LR_TO_LL_rotation(node->right_child);
-    R_rotation(node);
+    RL_TO_RR_rotation(node->right_child);
+    //cout<<"f node value="<<node->right_child->value<<"   "<<node->right_child->right_child->value<<endl;
+    L_rotation(node);
 }
 
 void AVLTree::RR_rotation(AVLTreeNode* node)
@@ -114,9 +141,10 @@ s32 AVLTree::left_rotation(AVLTreeNode* node)
 {
     if(node->right_child->bf>0)  //case1 : RL
     {
+        //cout<<"rl"<<endl;
         RL_rotation(node);
     }
-    else if(node->right_child->bf<0) //case2 :RR
+    else if(node->right_child->bf<=0) //case2 :RR
     {
         RR_rotation(node);
     }
@@ -130,7 +158,8 @@ s32 AVLTree::left_rotation(AVLTreeNode* node)
 
 s32 AVLTree::right_rotation(AVLTreeNode* node)
 {
-    if(node->left_child->bf>0)  //case1 : LL
+    //cout<<"root value ="<<root->value<<endl;
+    if(node->left_child->bf>=0)  //case1 : LL
     {   
         LL_rotation(node);
     }
@@ -140,7 +169,7 @@ s32 AVLTree::right_rotation(AVLTreeNode* node)
     }
     else
     {
-        cout<<"value="<<node->value<<endl;
+        //cout<<"value="<<node->value<<endl;
         cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error!"<<endl;
     }
 }
@@ -163,6 +192,7 @@ s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_sta
                     if(GROWN==opr_stat)
                     {
                         root->bf=EH;
+                        opr_stat=NOT_CHANGED;
                     }
                 break;
                 case RH:
@@ -170,7 +200,9 @@ s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_sta
                     /*Current node's bf turns EH after rotating,the height of tree has not grown anymore.*/
                     if(GROWN==opr_stat)
                     {
+                        //cout<<"hear"<<endl;
                         left_rotation(root);
+                        //cout<<"value="<<root->value<<endl;
                         root->bf=EH;
                         opr_stat=NOT_CHANGED;
                     }
@@ -180,6 +212,7 @@ s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_sta
                     if(GROWN==opr_stat)
                     {
                         root->bf=RH;
+                        //opr_stat=NOT_CHANGED;
                     }
                 break;
                 default:break;
@@ -228,12 +261,14 @@ s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_sta
                     if(GROWN==opr_stat)
                     {
                         root->bf=EH;
+                        opr_stat=NOT_CHANGED;
                     }
                 break;
                 case EH:
                     if(GROWN==opr_stat)
                     {
                         root->bf=LH;
+                        //opr_stat=NOT_CHANGED;
                     }
                 break;
                 default:break;
@@ -334,6 +369,7 @@ void AVLTree::delete_no_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat
     {
         if(NULL==node->left_child)
         {
+            cout<<"no left"<<endl;
             node->bf=EH;
             opt_stat=SHORTEN;
             delete node->right_child;
@@ -415,20 +451,24 @@ void AVLTree::delete_only_right_child(AVLTreeNode* node,side_t side,del_stat_t& 
 
 void AVLTree::sub_tree_shorten(AVLTreeNode* node,side_t side,del_stat_t& opt_stat)
 {
+    /*The left sub tree has shorten*/
     if(LEFT==side)
     {
-        cout<<"delete"<<endl;
+        //cout<<"delete"<<endl;
+        
         switch(node->bf)
         {
             case LH:
-            right_rotation(node);
             node->bf=EH;
-            opt_stat=NOT_CHANGE;
+            
             break;
             case EH:
             node->bf=LH;
+            opt_stat=NOT_CHANGE;
             break;
             case RH:
+            left_rotation(node);
+            opt_stat=NOT_CHANGE;
             node->bf=EH;
             break;
             default:break;
@@ -439,14 +479,15 @@ void AVLTree::sub_tree_shorten(AVLTreeNode* node,side_t side,del_stat_t& opt_sta
         switch(node->bf)
         {
             case LH:
+            right_rotation(node);
+            opt_stat=NOT_CHANGE;
             node->bf=EH;
             break;
             case EH:
             node->bf=LH;
-            break;
-            case RH:
-            left_rotation(node);
             opt_stat=NOT_CHANGE;
+            break;
+            case RH:            
             node->bf=EH;
             break;
             default:break;
@@ -494,6 +535,7 @@ s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& opt_stat)
         switch(opt_stat)
         {
             case DELETE_NO_CHILD:
+                //cout<<"f value "<<root->value<<endl;
                 delete_no_child(root,RIGHT,opt_stat);
                 break;
                 /*delete the node,point the father's left_child pointer to left_child*/
@@ -519,6 +561,7 @@ s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& opt_stat)
         /*the swap node is the smallest node in sub-right tree.*/
         if((NULL==root->left_child)&&(NULL==root->right_child))
         {
+            //cout<<"delete "<<root->value<<endl;
             opt_stat=DELETE_NO_CHILD;
         }
         else if((NULL!=root->left_child)&&(NULL==root->right_child))
@@ -577,24 +620,44 @@ void AVLTree::swap_two_node_value(AVLTreeNode*& node1,AVLTreeNode*& node2)
 
 
 
-int main()
+int main(int argc,char *argv[])
 {
     del_stat_t stat;
+    char str[50];
+    u32 c;
     AVLTree AVL;
     AVLTreeNode* root;
+    //root=AVL.create_tree(13);
     //u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-    u32 data[]={13,19,5,17,16,10,14,20,12,11,15,9,8,7,6,18,4,2,3,1};
+    u32 data[]={13,19,5,17,16,10,14,20,12,11,15,9,8,7,6,18,4,2,3,1,36,38,23,24,25,29,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
+    // while(cin>>c)
+    // {
+    //     //cout<<c<<endl;
+    //     AVL.insert_node(root,c);
+    //     cout<<"new tree ="<<endl;;
+    //     AVL.level_traversal(root);
+    //     cout<<endl;
+    //     cout<<endl;
+    // }
     root=AVL.create_tree(data[0]);
-    for(int i=1;i<20;i++)
+    for(int i=1;i<23;i++)
     {
         AVL.insert_node(root,data[i]);
     }
 
-    //AVL.delete_node(root,1,stat);
-    //AVL.delete_node(root,1,stat);
-    //AVL.delete_node(root,2,stat);
+    // cout<<root->value<<" "<<root->bf<<endl;
+    // cout<<root->left_child->value<<" "<<root->left_child->bf<<endl;
+    // cout<<root->right_child->value<<" "<<root->right_child->bf<<endl;
+    //AVL.delete_node(root,5,stat);
+    // AVL.delete_node(root,20,stat);
+    // AVL.delete_node(root,18,stat);
+    // AVL.delete_node(root,14,stat);
+    // AVL.delete_node(root,16,stat);
+    //AVL.delete_node(root,3,stat);
     //cout<<"stat="<<stat<<endl;
     //AVL.insert_node(root,data[3]);
     AVL.level_traversal(root);
     cout<<endl;
+    //AVL.preorder_traversal(root);
+    //cout<<endl;
 }
