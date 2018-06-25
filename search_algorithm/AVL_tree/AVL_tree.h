@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "math.h"
 #include "binary.h"
 
 #ifndef PRE_DEFINE
@@ -30,11 +31,15 @@ using u16=unsigned short;
 #define UNBANLANCED_NON_ROOT  2
 #define MAX(a,b)  (a>b?a:b)
 
+
+#define UNBALANCED  1
+#define BALANCED    0
+
 struct AVLTreeNode
 {
 	AVLTreeNode *left_child;
 	AVLTreeNode *right_child;
-    s32 height;
+    s32 height;                 //The initial value is 1
     s32 bf;  /*balance factory*/
 	u32 value;
 };
@@ -54,11 +59,9 @@ typedef enum
 
 typedef enum
 {
-    DELETE_NO_CHILD,
-    DELETE_ONLY_LEFT_CHILD,
-    DELETE_ONLY_RIGHT_CHILD,
+    DELETE_ONE_CHILD,
+    DELETE_TWO_CHILD,
     NOT_CHANGE,
-    SHORTEN,
 }del_stat_t;
 
 #define  LH   1   /*left subtree height is taller than right subtree height by 1*/
@@ -76,12 +79,11 @@ class AVLTree:public BinaryTree<AVLTreeNode>
         s32 adjust_tree(AVLTreeNode* root);
         AVLTreeNode* find_node(AVLTreeNode* root,u32 value);
         s32 delete_node(AVLTreeNode* root,u32 value);
-        AVLTreeNode* find_smallest_from_sub_right(AVLTreeNode* root,del_stat_t& opt_stat);
-        s32 delete_node(AVLTreeNode* root,u32 value,del_stat_t& opt_stat);
+        AVLTreeNode* find_smallest_from_sub_right(AVLTreeNode* father,AVLTreeNode* root);
+        s32 delete_node(AVLTreeNode* root,u32 value,del_stat_t& stat);
     private:
         void swap_two_node_value(AVLTreeNode*& node1,AVLTreeNode*& node2);
-        s32 insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_stat);
-        s32 check_balance(AVLTreeNode* root);
+        s32 insert_node(AVLTreeNode* root,AVLTreeNode* node);
         s32 adjust_tree_node(AVLTreeNode* root,u32 unbanlance_reason);
         s32 adjust_root_only_one_child_case(AVLTreeNode* root);
         void relink_node(AVLTreeNode* root,AVLTreeNode* left,AVLTreeNode* right);
@@ -101,10 +103,16 @@ class AVLTree:public BinaryTree<AVLTreeNode>
         void R_rotation(AVLTreeNode* node);
         void L_rotation(AVLTreeNode* node);
 
-        void delete_no_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat);
         void delete_only_left_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat);
         void delete_only_right_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat);
         void sub_tree_shorten(AVLTreeNode* node,side_t side,del_stat_t& opt_stat);
+
+
+
+        s32 set_height(AVLTreeNode* node);
+        s32 get_height(AVLTreeNode* node);
+        s32 check_balance(AVLTreeNode* node);
+        s32 balance_tree_operation(AVLTreeNode* node);
         AVLTreeNode *root;
 };
 

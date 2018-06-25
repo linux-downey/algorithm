@@ -335,7 +335,6 @@ s32 BinaryTree<NODE_TYPE>::post_order_traversal(NODE_TYPE *root)
 template<class NODE_TYPE>
 s32 BinaryTree<NODE_TYPE>::level_traversal(NODE_TYPE *root)
 {
-
 	if(NULL==root)
 	{
 		return -1;

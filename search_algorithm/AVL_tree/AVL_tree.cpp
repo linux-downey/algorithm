@@ -20,7 +20,7 @@ AVLTree::~AVLTree()
 AVLTreeNode* AVLTree::create_tree(u32 value)
 {
     root=new AVLTreeNode;
-    root->height=0;
+    root->height=1;
     root->bf=EH;
     root->value=value;
     root->left_child=NULL;
@@ -29,57 +29,178 @@ AVLTreeNode* AVLTree::create_tree(u32 value)
 }
 
 
+/*Check banlance.If the node's left_child and right_child differ by 2,need to adjust.*/
+s32 AVLTree::check_balance(AVLTreeNode* node)
+{
+    u32 left_height=0;
+    u32 right_height=0;
+
+    left_height=get_height(node->left_child);
+    
+    right_height=get_height(node->right_child);
+    
+    if(abs(left_height-right_height)>=2)
+    {
+        return UNBALANCED;
+    }
+    return BALANCED;
+}
+
+s32 AVLTree::balance_tree_operation(AVLTreeNode* node)
+{
+    if(get_height(node->left_child)>get_height(node->right_child))
+    {
+        //case LL
+        if(get_height(node->left_child->left_child) >= get_height(node->left_child->right_child))
+        {
+            R_rotation(node);
+        }
+        //case LR
+        else
+        {
+            LR_TO_LL_rotation(node->left_child);
+            R_rotation(node);
+        }
+    }
+    else
+    {
+        //case RR
+        if(get_height(node->right_child->right_child) >= get_height(node->right_child->left_child))
+        {
+            L_rotation(node);
+        }
+        //case RL
+        else
+        {
+            RL_TO_RR_rotation(node->right_child);
+            L_rotation(node);
+        }
+    }
+}
+
+
+/*Get height of node*/
+s32 AVLTree::get_height(AVLTreeNode* node)
+{
+    if(NULL==node)
+    {
+        return 0;
+    }
+    return node->height;
+}
+
+
+
+/*We should re-calculate the height of tree after insert/delete/rotation..,the way is the higher child's height +1*/
+s32 AVLTree::set_height(AVLTreeNode* node)
+{
+    u32 left_height=0;
+    u32 right_height=0;
+
+    left_height=get_height(node->left_child);
+    right_height=get_height(node->right_child);
+
+    node->height=left_height>right_height?left_height+1:right_height+1;
+}
+
+
+
+/**     local rotation.The bf of node A and node C will be changed after.
+**      explanation:After local left-rotation graph(1) turns to graph(2)
+**                  exchange the contents of node A and node C.In this way can we keep the link of the father node,
+**                  otherwise need to change the father's child pointer.
+**      The node N is NULL;
+**      case1:node B,D,E are NULL;bf of A becomes LH,bf of C becomes EH.
+**      case2:node E is NULL;bf of A becomes LH+LH,bf of C becomes EH
+**      case3:node D is NULL;bf of A becomes LH,bf of C becomes LH
+**      However,The bf of A will be changed again,so we can not set it.         
+**                A            C            A
+**               / \          / \          / \ 
+**              B   C  ==>   A   E    ==> C   E
+**                 / \      / \          / \
+**                D   E    B   D        B   D
+**              (1)           (2)           (3)
+**
+*/
 void AVLTree::LR_TO_LL_rotation(AVLTreeNode* node)
 {
-    AVLTreeNode* temp=node->right_child;   
+    AVLTreeNode* temp_r=node->right_child;    //record right_child
+    AVLTreeNode* temp_rl=node->right_child->left_child;   //record right_child's left_child
 
-    node->right_child->left_child=node;          
-    node->right_child=NULL;
+    temp_r->left_child=node;          
+    node->right_child=temp_rl;
 
     /*The top node is node->right_child after rotation,but the node's father still point to node.
       So we should move the node to the top position.*/
-    swap_two_node_value(temp,node);
-    node->left_child=temp;
+    swap_two_node_value(temp_r,node);
+    node->left_child=temp_r;
 
-    if(NULL==node->right_child)
-    {
-        node->bf=LH;
-        node->left_child->bf=EH;
-    }   
-    else
-    {
-        node->bf=LH;
-        node->left_child->bf=LH;
-    }
+    set_height(node->left_child);
+    set_height(node);
 }
 
+
+
+/**     local rotation.The bf of node A and node B will be changed after.
+**      explanation:After local right-rotation graph(1) turns to graph(2)
+**                  exchange the contents of node A and node B.In this way can we keep the link of the father node,
+**                  otherwise need to change the father's child pointer.
+**      The node N is NULL;
+**      case1:node C,D,E are NULL;bf of A becomes RH,bf of B becomes EH.
+**      case2:node D is NULL;bf of A becomes RH+RH,bf of B becomes EH
+**      case3:node E is NULL;bf of A becomes RH,bf of B becomes RH
+**      case4:all node is valid.bf of A becomes RH,bf of B becomes EH.
+**      However,The bf of A will be changed again,so we can not set it.         
+**                A            B            A
+**               / \          / \          / \ 
+**              B   C  ==>   D   A    ==> D   B
+**             / \              / \          / \
+**            D   E            E   C        E   C
+**              (1)           (2)          (3)
+**
+*/
 void AVLTree::RL_TO_RR_rotation(AVLTreeNode* node)
 {
-    AVLTreeNode* temp=node->left_child;
+    AVLTreeNode* temp_l=node->left_child;
+    AVLTreeNode* temp_lr=node->left_child->right_child;
 
-    node->left_child->right_child=node;
-    node->left_child=NULL;
+    temp_l->right_child=node;
+    node->left_child=temp_lr;
     //cout<<"hehehe"<<endl;
     /*The top node is node->left_child after rotation,but the node's father still point to node.
       So we should move the node to the top position.*/
-    swap_two_node_value(temp,node);
+    swap_two_node_value(temp_l,node);
 
-    node->right_child=temp;
+    node->right_child=temp_l;
 
-    if(NULL==node->left_child)
-    {
-        node->bf=RH;
-        node->right_child->bf=EH;
-    }
-    else
-    {
-        node->bf=RH;
-        node->right_child->bf=RH;
-    }
+    set_height(node->right_child);
+    set_height(node);
+
+    // cout<<node->right_child->height<<endl;
+    // cout<<node->height<<endl;
 }
 
 
-/*case RR rotation*/
+/**     After local rotation or not,the case only are:LL or RR
+**      explanation:After left-rotation graph(1) turns to graph(2)
+**      exchange the contents of node A and node B.In this way can we keep the link of the father node,
+**      otherwise need to change the father's child pointer.
+**      The node N is NULL;
+**      case1:node F and G are NULL,bf of A is EH,bf of C is EH;
+**      case2:node F|G don't equal to NULL,bf of A is LH,bf of C is RH.
+**      case3:node B F G H are NULL,bf of A is LH,bf of C is RH.
+**      case4:node B D F G H are NULL,bf of A is EH,bf of C is EH.
+**
+**
+**           A                      C                       A
+**          / \                    / \                     / \
+**         B   C                  A   E                   C   E
+**            / \     ==>        / \   \       ==>       / \   \
+**           D   E              B   D   H               B   D   H
+**          / \   \                / \                     / \
+**         F   G   H              F   G                   F   G
+**         (1)                     (2)                     (3)
+**/
 void AVLTree::L_rotation(AVLTreeNode* node)   
 {
     AVLTreeNode* temp=node->right_child->left_child;
@@ -91,10 +212,41 @@ void AVLTree::L_rotation(AVLTreeNode* node)
     swap_two_node_value(swap_temp,node);
     node->left_child=swap_temp;
 
-    node->bf=node->left_child->bf=0;
+    // if(node->left_child->right_child->left_child||node->left_child->right_child->right_child)
+    // {
+    //     node->bf=LH;
+    //     node->right_child->bf=RH;
+    // }
+    // else
+    // {
+    //     node->bf=node->left_child->bf=EH;
+    // }
+    set_height(node->left_child);
+    set_height(node);
 }
 
-/*case LL rotation*/
+
+
+/**     After local rotation or not,the case only are:LL or RR
+**      explanation:After right-rotation graph(1) turns to graph(2)
+**      exchange the contents of node A and node B.In this way can we keep the link of the father node,
+**      otherwise need to change the father's child pointer.
+**      The node N is NULL;
+**      case1:node G and H are NULL,bf of A is EH,bf of B is EH;
+**      case2:node G|H don't equal to NULL,bf of A is RH,bf of B is LH.
+**      case3:node C F G H are NULL,bf of A is RH,bf of B is LH.
+**      case4:node C E F G H are NULL,bf of A is EH,bf of B is EH.
+**
+**
+**           A                      B                       A
+**          / \                    / \                     / \
+**         B   C                  D   A                   D   B
+**        / \     ==>            /   / \          ==>    /   / \  
+**       D   E                  F   E   C               F   E   C
+**      /   / \                    / \                     / \
+**     F   G   H                  G   H                   G   H
+**         (1)                     (2)                     (3)
+**/
 void AVLTree::R_rotation(AVLTreeNode* node)
 {
     AVLTreeNode* temp=node->left_child->right_child;
@@ -107,7 +259,8 @@ void AVLTree::R_rotation(AVLTreeNode* node)
     swap_two_node_value(swap_temp,node);
     node->right_child=swap_temp;
 
-    node->bf=node->right_child->bf=0;
+    set_height(node->right_child);
+    set_height(node);
 }
 
 
@@ -175,130 +328,46 @@ s32 AVLTree::right_rotation(AVLTreeNode* node)
 }
 
 
-
-s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_stat)
+s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node)
 {
+    //Alone the right path.
     if(node->value>root->value)
     {
         if(NULL!=root->right_child)
         {
-            /*Call insert_node recursively*/
-            insert_node(root->right_child,node,opr_stat);
-            switch(root->bf)
+            insert_node(root->right_child,node);
+            set_height(root);
+            if(UNBALANCED==check_balance(root))
             {
-                /*If current node'bf is LH(left-subtree-height - right-subtree-height=1)*/
-                case LH:
-                    /*If the inserted node increases the tree,according to **if(NULL!=root->right_child)** above .right sub-tree grown one,so LH+RH=EH*/
-                    if(GROWN==opr_stat)
-                    {
-                        root->bf=EH;
-                        opr_stat=NOT_CHANGED;
-                    }
-                break;
-                case RH:
-                    /*If the inserted node increases the tree,according to **if(NULL!=root->right_child)** above .right sub-tree grown one,so RH+RH=-2,need to rotate*/
-                    /*Current node's bf turns EH after rotating,the height of tree has not grown anymore.*/
-                    if(GROWN==opr_stat)
-                    {
-                        //cout<<"hear"<<endl;
-                        left_rotation(root);
-                        //cout<<"value="<<root->value<<endl;
-                        root->bf=EH;
-                        opr_stat=NOT_CHANGED;
-                    }
-                break;
-                /*If the inserted node increases the tree,according to **if(NULL!=root->right_child)** above .right sub-tree grown one,so EH+RH=RH*/
-                case EH:
-                    if(GROWN==opr_stat)
-                    {
-                        root->bf=RH;
-                        //opr_stat=NOT_CHANGED;
-                    }
-                break;
-                default:break;
+                balance_tree_operation(root);
             }
         }
-        /*Find a null node,insert node.Use opr_stat indicate that whether the height of tree was grown.*/
-        /*Set the variable bf of inserted node's father node.*/
-        /*And combine above to determine the balance factor along recursive path nodes,if unbalanced,rotation tree.*/
         else
         {
+            root->height+=1;
             root->right_child=node;
-            if(root->left_child==NULL)
-            {
-                root->bf=RH;
-                opr_stat=GROWN;
-                return 0;
-            }
-            else
-            {
-                root->bf=EH;
-                opr_stat=NOT_CHANGED;
-                return 0;
-            }
         }
     }
+    //Alone the left path.
     else if(node->value<root->value)
     {
-
         if(NULL!=root->left_child)
         {
-            insert_node(root->left_child,node,opr_stat);
-            switch(root->bf)
+            insert_node(root->left_child,node);
+            set_height(root);
+            if(UNBALANCED==check_balance(root))
             {
-                /*If current node'bf is LH(left-subtree-height - right-subtree-height=1)*/
-                case LH:
-                /*If the inserted node increases the tree,according to **if(NULL!=root->left_child)** above .left sub-tree grown one,so LH+LH=2,need to rotate.*/
-                    /*Current node's bf turns EH after rotating,the height of tree has not grown anymore.*/
-                    if(GROWN==opr_stat)
-                    {
-                        right_rotation(root);
-                        root->bf=EH;
-                        opr_stat=NOT_CHANGED;
-                    }
-                break;
-                case RH:
-                    if(GROWN==opr_stat)
-                    {
-                        root->bf=EH;
-                        opr_stat=NOT_CHANGED;
-                    }
-                break;
-                case EH:
-                    if(GROWN==opr_stat)
-                    {
-                        root->bf=LH;
-                        //opr_stat=NOT_CHANGED;
-                    }
-                break;
-                default:break;
+                balance_tree_operation(root);
             }
         }
         else
         {
-            /*Find a null node,insert node.Use opr_stat indicate that whether the height of tree was grown.*/
-        /*Set the variable bf of inserted node's father node.*/
-        /*And combine above to determine the balance factor along recursive path nodes,if unbalanced,rotation tree.*/
             root->left_child=node;
-            
-            if(root->right_child==NULL)
-            {
-                root->bf=LH;
-                opr_stat=GROWN;
-                //cout<<"insert"<<endl;
-                return 0;
-            }
-            else
-            {
-                root->bf=EH;
-                opr_stat=NOT_CHANGED;
-                return 0;
-            }
+            root->height+=1;
         }
     }
     else
     {
-        opr_stat=NOT_CHANGED;
         cout<<"Not support same vlaue"<<endl;
         return -1;
     }
@@ -306,19 +375,17 @@ s32 AVLTree::insert_node(AVLTreeNode* root,AVLTreeNode* node,opr_stat_t& opr_sta
 }
 
 
-
 s32 AVLTree::insert_node(AVLTreeNode* root,u32 value)
 {
     s32 ret=0;
-    opr_stat_t stat=NOT_CHANGED;
     AVLTreeNode* temp=new AVLTreeNode;
     temp->value=value;
     temp->left_child=NULL;
     temp->right_child=NULL;
-    temp->height=0;
+    temp->height=1;
     temp->bf=EH;
 
-    insert_node(root,temp,stat);
+    insert_node(root,temp);
 
     return 0;
 }
@@ -326,258 +393,166 @@ s32 AVLTree::insert_node(AVLTreeNode* root,u32 value)
 
 
 /**/
-AVLTreeNode* AVLTree::find_smallest_from_sub_right(AVLTreeNode* root,del_stat_t& opt_stat)
+AVLTreeNode* AVLTree::find_smallest_from_sub_right(AVLTreeNode* father,AVLTreeNode* root)
 {
+    AVLTreeNode* temp;
     if(NULL!=root->left_child)
     {
-        find_smallest_from_sub_right(root->left_child,opt_stat);
+        temp=find_smallest_from_sub_right(root,root->left_child);
+        set_height(root);
+        return temp;
     }
     else
     {
-
+        if(father->left_child==root)
+        {
+            father->left_child=NULL;
+        }
+        else if(father->right_child==root)
+        {
+            father->right_child=NULL;
+        }
         return root;
     }
 }
 
 
-/*The param node is the father of need to be deleted node.*/
-/*The param side the node need to be deleted is on the left/right sub tree.*/
-void AVLTree::delete_no_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat)
-{
-    if(LEFT==side)
-    {
-        /*If the node need to be deleted has not brother,the height shorten.*/
-        if(NULL==node->right_child)
-        {
-            node->bf=EH;
-            opt_stat=SHORTEN;
 
-            delete node->left_child;
-            node->left_child=NULL;
-        }
-        /*If the node need to be deleted has brother,the height not changed.*/
-        else
-        {
-            /*delete left,left-height - right-height =RH*/
-            node->bf=RH;
-            opt_stat=NOT_CHANGE;
-            delete node->left_child;
-            node->left_child=NULL;
-        }
-    }
-    else if(RIGHT==side)
-    {
-        if(NULL==node->left_child)
-        {
-            cout<<"no left"<<endl;
-            node->bf=EH;
-            opt_stat=SHORTEN;
-            delete node->right_child;
-            node->right_child=NULL;
-        }
-        else
-        {
-            node->bf=LH;
-            opt_stat=NOT_CHANGE;
-            delete node->right_child;
-            node->right_child=NULL;
-        }
-    }
-    else
-    {
-         cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error!"<<endl;
-    }
-}
 
-/*The param node is the father of need to be deleted node.*/
-/*The param side the node need to be deleted is on the left/right sub tree.*/
-void AVLTree::delete_only_left_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat)
+
+
+
+
+
+
+s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& stat)
 {
     AVLTreeNode* temp;
-    if(LEFT==side)
+    AVLTreeNode* replace_node;
+    if(NULL==root)
     {
-        temp=node->left_child;
-        node->left_child=node->left_child->left_child;
-        /*According to characteristic,if the deleted node has noly left_child,it must has a brother.*/
-        node->bf=EH;
-        delete temp;
-        opt_stat=SHORTEN;
+        cout<<"ERROR::can't find node!!!"<<endl;
+        stat=NOT_CHANGE;
+        return -1;
     }
-    else if(RIGHT==side)
-    {
-        temp=node->right_child;
-        node->right_child=node->right_child->left_child;
-        /*According to characteristic,if the deleted node has noly left_child,it must has a brother.*/
-        node->bf=EH;
-        delete temp;
-        opt_stat=SHORTEN;
-    }
-    else
-    {
-        cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error!"<<endl;
-    }
-}
-
-
-
-
-void AVLTree::delete_only_right_child(AVLTreeNode* node,side_t side,del_stat_t& opt_stat)
-{
-    AVLTreeNode* temp;
-    if(LEFT==side)
-    {
-        temp=node->left_child;
-        node->left_child=node->left_child->right_child;
-        /*According to characteristic,if the deleted node has noly left_child,it must has a brother.*/
-        node->bf=EH;
-        delete temp;
-        opt_stat=SHORTEN;
-    }
-    else if(RIGHT==side)
-    {
-        temp=node->right_child;
-        node->right_child=node->right_child->right_child;
-        /*According to characteristic,if the deleted node has noly left_child,it must has a brother.*/
-        node->bf=EH;
-        delete temp;
-        opt_stat=SHORTEN;
-    }
-    else
-    {
-        cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error!"<<endl;
-    }
-}
-
-
-void AVLTree::sub_tree_shorten(AVLTreeNode* node,side_t side,del_stat_t& opt_stat)
-{
-    /*The left sub tree has shorten*/
-    if(LEFT==side)
-    {
-        //cout<<"delete"<<endl;
-        
-        switch(node->bf)
-        {
-            case LH:
-            node->bf=EH;
-            
-            break;
-            case EH:
-            node->bf=LH;
-            opt_stat=NOT_CHANGE;
-            break;
-            case RH:
-            left_rotation(node);
-            opt_stat=NOT_CHANGE;
-            node->bf=EH;
-            break;
-            default:break;
-        }
-    }
-    else if(RIGHT==side)
-    {
-        switch(node->bf)
-        {
-            case LH:
-            right_rotation(node);
-            opt_stat=NOT_CHANGE;
-            node->bf=EH;
-            break;
-            case EH:
-            node->bf=LH;
-            opt_stat=NOT_CHANGE;
-            break;
-            case RH:            
-            node->bf=EH;
-            break;
-            default:break;
-        }
-    }
-    else
-    {
-        cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error!"<<endl;
-    }
-}
-
-
-s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& opt_stat)
-{
-    AVLTreeNode* temp;
     if(root->value>value)
     {
-        delete_node(root->left_child,value,opt_stat);
-        switch(opt_stat)
+        delete_node(root->left_child,value,stat);
+        //root is father of the node to be deleted.
+        if(DELETE_ONE_CHILD==stat)
         {
-            case DELETE_NO_CHILD:
-            //cout<<root->value<<endl;
-            delete_no_child(root,LEFT,opt_stat);
-                break;
-            /*delete the node,point the father's left_child pointer to left_child*/
-            case DELETE_ONLY_LEFT_CHILD:
-                delete_only_left_child(root,LEFT,opt_stat);
-                break;
-                /*delete the node,point the father's left_child pointer to right_child*/
-            case DELETE_ONLY_RIGHT_CHILD:
-                delete_only_right_child(root,LEFT,opt_stat);
-                break;
-            case NOT_CHANGE:
-                break;
-            case SHORTEN:
-                sub_tree_shorten(root,LEFT,opt_stat);
-                break;
-            default:break;
+            temp=root->left_child;
+            //Only right child or no child
+            if(NULL==temp->left_child)
+            {
+                root->left_child=temp->right_child;
+            }
+            //Only left child
+            else if(NULL==temp->right_child)
+            {
+                root->left_child=temp->left_child;
+            }
+
+            stat=NOT_CHANGE;
+            delete temp;
+        }
+        //root is father of the node which to be deleted.
+        else if(DELETE_TWO_CHILD==stat)
+        {
+            temp=root->left_child;
+            //find the replace node.
+            replace_node=find_smallest_from_sub_right(temp,temp->right_child);
+
+            if(replace_node==temp->right_child)
+            {
+                replace_node->right_child=temp->right_child->right_child;
+            }
+            else
+            {
+                replace_node->right_child=temp->right_child;
+            }
+            replace_node->left_child=temp->left_child;
+            root->left_child=replace_node;
+
+            set_height(replace_node);
+
+            stat=NOT_CHANGE;
+            delete temp;
+        }
+        else
+        {
+
+        }
+        set_height(root);
+        if(UNBALANCED==check_balance(root))
+        {
+            balance_tree_operation(root);
         }
     }
     else if(root->value<value)
     {
-        
-        delete_node(root->right_child,value,opt_stat);
-        switch(opt_stat)
+        delete_node(root->right_child,value,stat);
+        if(DELETE_ONE_CHILD==stat)
         {
-            case DELETE_NO_CHILD:
-                //cout<<"f value "<<root->value<<endl;
-                delete_no_child(root,RIGHT,opt_stat);
-                break;
-                /*delete the node,point the father's left_child pointer to left_child*/
-            case DELETE_ONLY_LEFT_CHILD:
-                delete_only_left_child(root,RIGHT,opt_stat);
-                break;
-                /*delete the node,point the father's left_child pointer to right_child*/
-            case DELETE_ONLY_RIGHT_CHILD:
-                delete_only_right_child(root,RIGHT,opt_stat);
-                break;
-            case NOT_CHANGE:
-                break;
-            case SHORTEN:
-                sub_tree_shorten(root,RIGHT,opt_stat);
-                break;
-            default:break;
+            temp=root->right_child;
+            if(NULL==temp->left_child)
+            {
+                root->right_child=temp->right_child;
+            }
+            //Only left child
+            else if(NULL==temp->right_child)
+            {
+                root->right_child=temp->left_child;
+            }
+            stat=NOT_CHANGE;
+            delete temp;
         }
+        else if(DELETE_TWO_CHILD==stat)
+        {
+            //record the node need to be deleted.
+            temp=root->right_child;
+            //find the replace node.
+            replace_node=find_smallest_from_sub_right(temp,temp->right_child);
 
+            if(replace_node==temp->right_child)
+            {
+                replace_node->right_child=temp->right_child->right_child;
+            }
+            else
+            {
+                replace_node->right_child=temp->right_child;
+            }
+            replace_node->left_child=temp->left_child;
+            root->right_child=replace_node;
+
+            set_height(replace_node);
+
+            stat=NOT_CHANGE;
+            delete temp;
+        }
+        else
+        {
+            
+        }
+        set_height(root);
+        if(UNBALANCED==check_balance(root))
+        {
+            balance_tree_operation(root);
+        }
     }
     else
     {
         /*the root node need to deleted.*/
         /*the swap node is the smallest node in sub-right tree.*/
-        if((NULL==root->left_child)&&(NULL==root->right_child))
+        if((NULL==root->left_child)||(NULL==root->right_child))
         {
-            //cout<<"delete "<<root->value<<endl;
-            opt_stat=DELETE_NO_CHILD;
-        }
-        else if((NULL!=root->left_child)&&(NULL==root->right_child))
-        {
-            opt_stat=DELETE_ONLY_LEFT_CHILD;
-        }
-        else if((NULL==root->left_child)&&(NULL!=root->right_child))
-        {
-            opt_stat=DELETE_ONLY_RIGHT_CHILD;
+            stat=DELETE_ONE_CHILD;
         }
         else
         {
             //AVLTreeNode* swap_node=find_smallest_from_sub_right(root->right_child,opt_stat);
+            stat=DELETE_TWO_CHILD;
         }
-        
-
     }
 }
 
@@ -628,32 +603,43 @@ int main(int argc,char *argv[])
     AVLTree AVL;
     AVLTreeNode* root;
     //root=AVL.create_tree(13);
-    //u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
-    u32 data[]={13,19,5,17,16,10,14,20,12,11,15,9,8,7,6,18,4,2,3,1,36,38,23,24,25,29,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
+    u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+    //u32 data[]={13,19,5,17,16,10,14,20,12,11,15,9,8,7,6,18,4,2,3,1,36,38,23,24,25,29,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
+    // u32 data[]={13,51,19,52,5,50,17,48,53,16,49,10,14,46,20,54,47,55,12,11,56,44,45,15,9,8
+    //             ,43,7,6,18,4,2,3,42,1,36,38,57,23,41,24,58,25,59,29,60,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
     // while(cin>>c)
     // {
-    //     //cout<<c<<endl;
-    //     AVL.insert_node(root,c);
+    //     //cout<<c<<endl;    //     AVL.insert_node(root,c);
     //     cout<<"new tree ="<<endl;;
     //     AVL.level_traversal(root);
     //     cout<<endl;
     //     cout<<endl;
     // }
     root=AVL.create_tree(data[0]);
-    for(int i=1;i<23;i++)
+    for(int i=1;i<20;i++)
     {
         AVL.insert_node(root,data[i]);
     }
+
+    AVL.level_traversal(root);
+    cout<<endl;
+    cout<<endl;
+    cout<<endl;
+    cout<<endl;
 
     // cout<<root->value<<" "<<root->bf<<endl;
     // cout<<root->left_child->value<<" "<<root->left_child->bf<<endl;
     // cout<<root->right_child->value<<" "<<root->right_child->bf<<endl;
     //AVL.delete_node(root,5,stat);
-    // AVL.delete_node(root,20,stat);
-    // AVL.delete_node(root,18,stat);
-    // AVL.delete_node(root,14,stat);
-    // AVL.delete_node(root,16,stat);
-    //AVL.delete_node(root,3,stat);
+     AVL.delete_node(root,2,stat);
+     AVL.delete_node(root,18,stat);
+    //  AVL.delete_node(root,3,stat);
+    //  AVL.delete_node(root,5,stat);
+    //  AVL.delete_node(root,7,stat);
+    //  AVL.delete_node(root,20,stat);
+    //  AVL.delete_node(root,17,stat);
+    //  AVL.delete_node(root,19,stat);
+    //  AVL.delete_node(root,18,stat);
     //cout<<"stat="<<stat<<endl;
     //AVL.insert_node(root,data[3]);
     AVL.level_traversal(root);
