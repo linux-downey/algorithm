@@ -113,6 +113,8 @@ class AVLTree:public BinaryTree<AVLTreeNode>
         s32 get_height(AVLTreeNode* node);
         s32 check_balance(AVLTreeNode* node);
         s32 balance_tree_operation(AVLTreeNode* node);
+        void delete_root_one_child(AVLTreeNode* root);
+        void delete_root_two_child(AVLTreeNode* root);
         AVLTreeNode *root;
 };
 

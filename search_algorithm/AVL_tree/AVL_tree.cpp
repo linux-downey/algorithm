@@ -421,8 +421,58 @@ AVLTreeNode* AVLTree::find_smallest_from_sub_right(AVLTreeNode* father,AVLTreeNo
 
 
 
+void AVLTree::delete_root_one_child(AVLTreeNode* root)
+{
+    AVLTreeNode* temp;
+    if(NULL==root->left_child)
+    {
+        temp=root->right_child;
+        swap_two_node_value(root,temp);
+        delete temp;
+    }
+    else if(NULL==root->right_child)
+    {
+        temp=root->left_child;
+        swap_two_node_value(root,temp);
+        delete temp;
+    }
+    else
+    {
+        cout<<__FILE__<<"-"<<__LINE__<<"-"<<"error"<<endl;
+    }
+}
 
+void AVLTree::delete_root_two_child(AVLTreeNode* root)
+{
+    AVLTreeNode* replace_node;
+    AVLTreeNode* temp;
+    // if(NULL==root->right_child->left_child)
+    // {
+    //     AVLTreeNode* temp=root->right_child;
+    //     AVLTreeNode* temp_r=root->right_child->right_child;
+    //     swap_two_node_value(root,temp);
+    //     root->left_child=temp->left_child;
+    //     delete temp;
+    // }
 
+    replace_node=find_smallest_from_sub_right(root,root->right_child);
+    if(replace_node==temp->right_child)
+    {
+        AVLTreeNode* temp=root->right_child;
+        AVLTreeNode* temp_r=root->right_child->right_child;
+        swap_two_node_value(root,temp);
+        root->left_child=temp->left_child;
+        delete temp;
+    }
+    else
+    {
+        swap_two_node_value(root,replace_node);
+        root->left_child=replace_node->left_child;
+        root->right_child=replace_node->right_child;
+        delete replace_node;
+    }
+    
+}
 
 
 
@@ -547,12 +597,27 @@ s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& stat)
         /*the swap node is the smallest node in sub-right tree.*/
         if((NULL==root->left_child)||(NULL==root->right_child))
         {
-            stat=DELETE_ONE_CHILD;
+            if(root==this->root)
+            {
+                delete_root_one_child(root);
+            }
+            else
+            {
+                stat=DELETE_ONE_CHILD;
+            }
+            
         }
         else
         {
+            if(root==this->root)
+            {
+                delete_root_two_child(root);
+            }
             //AVLTreeNode* swap_node=find_smallest_from_sub_right(root->right_child,opt_stat);
-            stat=DELETE_TWO_CHILD;
+            else
+            {
+                stat=DELETE_TWO_CHILD;
+            }
         }
     }
 }
@@ -604,10 +669,10 @@ int main(int argc,char *argv[])
     AVLTree AVL;
     AVLTreeNode* root;
     //root=AVL.create_tree(13);
-    u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+    //u32 data[]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
     //u32 data[]={13,19,5,17,16,10,14,20,12,11,15,9,8,7,6,18,4,2,3,1,36,38,23,24,25,29,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
-    // u32 data[]={13,51,19,52,5,50,17,48,53,16,49,10,14,46,20,54,47,55,12,11,56,44,45,15,9,8
-    //             ,43,7,6,18,4,2,3,42,1,36,38,57,23,41,24,58,25,59,29,60,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
+     u32 data[]={13,51,19,52,5,50,17,48,53,16,49,10,14,46,20,54,47,55,12,11,56,44,45,15,9,8
+                 ,43,7,6,18,4,2,3,42,1,36,38,57,23,41,24,58,25,59,29,60,27,40,26,30,34,32,33,31,35,21,37,22,39,28};
     // while(cin>>c)
     // {
     //     //cout<<c<<endl;    //     AVL.insert_node(root,c);
@@ -617,7 +682,7 @@ int main(int argc,char *argv[])
     //     cout<<endl;
     // }
     root=AVL.create_tree(data[0]);
-    for(int i=1;i<20;i++)
+    for(int i=1;i<60;i++)
     {
         AVL.insert_node(root,data[i]);
     }
@@ -632,11 +697,12 @@ int main(int argc,char *argv[])
     // cout<<root->left_child->value<<" "<<root->left_child->bf<<endl;
     // cout<<root->right_child->value<<" "<<root->right_child->bf<<endl;
     //AVL.delete_node(root,5,stat);
-    for(int i=0;i<19;i++)
+    for(int i=0;i<59;i++)
     {
         AVL.delete_node(root,i+1,stat);
     }
-    AVL.delete_node(root,19,stat);
+    // AVL.delete_node(root,8,stat);
+    // AVL.delete_node(root,9,stat);
     // AVL.delete_node(root,1,stat);
     // AVL.delete_node(root,2,stat);
     // AVL.delete_node(root,3,stat);
