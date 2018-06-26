@@ -79,6 +79,7 @@ s32 AVLTree::balance_tree_operation(AVLTreeNode* node)
 }
 
 
+
 /*Get height of node*/
 s32 AVLTree::get_height(AVLTreeNode* node)
 {
@@ -406,11 +407,11 @@ AVLTreeNode* AVLTree::find_smallest_from_sub_right(AVLTreeNode* father,AVLTreeNo
     {
         if(father->left_child==root)
         {
-            father->left_child=NULL;
+            father->left_child=root->right_child;
         }
         else if(father->right_child==root)
         {
-            father->right_child=NULL;
+            father->right_child=root->right_child;
         }
         return root;
     }
@@ -540,7 +541,7 @@ s32 AVLTree::delete_node(AVLTreeNode* root,u32 value,del_stat_t& stat)
             balance_tree_operation(root);
         }
     }
-    else
+    else         //when delete node is root.
     {
         /*the root node need to deleted.*/
         /*the swap node is the smallest node in sub-right tree.*/
@@ -631,8 +632,23 @@ int main(int argc,char *argv[])
     // cout<<root->left_child->value<<" "<<root->left_child->bf<<endl;
     // cout<<root->right_child->value<<" "<<root->right_child->bf<<endl;
     //AVL.delete_node(root,5,stat);
-     AVL.delete_node(root,2,stat);
-     AVL.delete_node(root,18,stat);
+    for(int i=0;i<19;i++)
+    {
+        AVL.delete_node(root,i+1,stat);
+    }
+    AVL.delete_node(root,19,stat);
+    // AVL.delete_node(root,1,stat);
+    // AVL.delete_node(root,2,stat);
+    // AVL.delete_node(root,3,stat);
+    // AVL.delete_node(root,4,stat);
+    // AVL.delete_node(root,5,stat);
+    // AVL.delete_node(root,6,stat);
+    // AVL.delete_node(root,7,stat);
+    // AVL.delete_node(root,8,stat);
+    // AVL.delete_node(root,9,stat);
+    // AVL.delete_node(root,10,stat);
+    // AVL.delete_node(root,11,stat);
+    // AVL.delete_node(root,18,stat);
     //  AVL.delete_node(root,3,stat);
     //  AVL.delete_node(root,5,stat);
     //  AVL.delete_node(root,7,stat);
